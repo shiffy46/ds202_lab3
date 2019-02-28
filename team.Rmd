@@ -1,0 +1,83 @@
+---
+title: "Team"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+chooseCRANmirror(graphics=FALSE, ind=1)
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("productplots")
+data(happy, package="productplots")
+head(happy)
+HAPPY <- readRDS("HAPPY.rds")
+```
+
+Part 1
+1.Data cleaning: the values "IAP", "DK" and "NA" all encode missing values. Replace all of these instances by the value NA.
+```{r}
+  HAPPY[HAPPY =='IAP' | HAPPY =='DK' |HAPPY =='NA']<-NA
+  ```
+</b>
+2. Check the type of the variable and cast into the right type (factor variable for categorical variables). For age, change "89 OR OLDER" to 89 and assume the variable should be numeric. (Hint: see ?as.character and ?as.numeric)
+```{r}
+  HAPPY$HAPPY <-as.factor(HAPPY$HAPPY)
+  HAPPY$AGE[HAPPY$AGE =="89 OR OLDER"]<-89
+  HAPPY$AGE <- as.numeric(HAPPY$AGE)
+  HAPPY$SEX <-as.factor(HAPPY$SEX)
+  HAPPY$MARITAL <-as.factor(HAPPY$MARITAL)
+  HAPPY$DEGREE <-as.factor(HAPPY$DEGREE)
+  HAPPY$FINRELA <-as.factor(HAPPY$FINRELA)
+  HAPPY$HEALTH <-as.factor(HAPPY$HEALTH)
+  HAPPY$WTSSALL <-as.numeric(HAPPY$WTSSALL)
+  HAPPY$PARTYID <-as.factor(HAPPY$PARTYID)
+```
+3. Factor the data
+```{r}
+HAPPY$HEALTH<- factor(HAPPY$HEALTH,c("POOR","FAIR","GOOD","EXCELLENT","DK"))
+HAPPY$FINRELA <-factor(HAPPY$FINRELA,c("FAR BELOW AVERAGE","BELOW AVERAGE","AVERAGE","ABOVE AVERAGE","FAR ABOVE AVERAGE" ))
+HAPPY$MARITAL <- factor(HAPPY$MARITAL ,c("NEVER MARRIED","MARRIED","DIVORCED","SEPERATED","WIDOWED"))
+HAPPY$DEGREE <-factor(HAPPY$DEGREE,c("HIGH SCHOOL","LT HIGH SCHOOL","JUNIOR COLLEGE" ,"BACHELOR","GRADUATE","DK"))
+HAPPY$PARTYID<-factor(HAPPY$PARTYID,c("IND,NEAR REP","INDEPENDENT","IND,NEAR DEM","NOT STR DEMOCRAT","STRONG DEMOCRAT","STRONG REPUBLICAN","NOT STR REPUBLICAN", "OTHER PARTY"))
+```
+
+Part 2:
+(1)-----------------------------------------------------
+```{r}
+library("ggplot2")
+ggplot(data=HAPPY, aes(x=HAPPY)) + geom_bar(aes(fill=HEALTH))
+```
+
+You can see how the happiness ratings are distributed among the health of individuals. I found it kind of weird how people with poor health would say they are very happy, strange phenomenon. But the most even distribution is in the "not to happy" category. I think this may have to do with the fact that unhappiness doesn't directly spur from health in general. Going to dig deeper to find what correlates more with "not to happy".
+
+
+```{r}
+ggplot(data=HAPPY, aes(x=HAPPY, y=AGE, na.rm=TRUE)) + geom_boxplot(aes(fill=SEX))
+```
+
+You can see in this plot that the average age of men is lower in the "not too happy" and "pretty happy" categories. But in the "very happy" category the average age of men is higher. It seems that a mans happiness increases as he gets older, while women tend to stay the same at each age.
+
+(2)------------------------------------------------------
+```{r}
+ggplot(HAPPY, aes(x=MARITAL)) + geom_bar(aes(fill=HAPPY))+theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+It seems that most people based on marriage are 'pretty happy'. I am surprised that most people who are divorced are 'pretty happy'. The distribution of Married people is very lopsided towards 'very happy'
+
+```{r}
+install.packages("ggmosaic")
+library("ggmosaic")
+ggplot(HAPPY, aes(na.rm=TRUE)) + geom_mosaic(aes(x=product(HAPPY), fill=FINRELA, na.rm=TRUE))+theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+You can see that the 'very happy' category has a large percentage of above average finacial relativity. Seems like the more money one has the happier he/she is. There is also are large percentage of people in the 'not too happy' who are far below average in finacial relativity.
+
+```{r}
+library("ggplot2")
+ggplot(HAPPY, aes(fill=HAPPY)) + geom_histogram(aes(x=AGE), binwidth=10, position="dodge") + scale_y_log10()
+```
+
+It seems that the peak of very happiness comes when you are around age 28.
+
+
+(3)
+Looking through the dataset we can see that many factor effect happiness overall. The factors that I looked at were age, finrela, and marriage. These variables seemed to have an effect on overall happiness. The age had a spike in happiness when the age was around 28. The finrela had a great increase in 'very happy' when the finrela was above average. Finally, the marriage status was largely distributed over the married category in 'pretty happy' and 'very happy'.

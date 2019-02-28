@@ -1,0 +1,87 @@
+---
+title: "individual1"
+author: "Sam Shifflett"
+date: "Feburary 28, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+chooseCRANmirror(graphics=FALSE, ind=1)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+install.packages("productplots")
+data(happy, package="productplots")
+head(happy)
+HAPPY <- readRDS("HAPPY.rds")
+```
+finrela: income level for family
+wtssall: weight of the variables
+
+Part 1:
+(1)
+```{r}
+head(HAPPY)
+HAPPY[HAPPY == "IAP" | HAPPY == "DK" | HAPPY == "NA"] <- NA
+```
+
+
+(2)
+```{r}
+HAPPY[HAPPY == "89 OR OLDER"] <- 89
+HAPPY[, "AGE"] <- sapply(HAPPY[, "AGE"], as.numeric)
+sapply(HAPPY,class)
+```
+
+
+(3)
+```{r}
+install.packages("tidyverse")
+library("dplyr")
+?dplyr::arrange
+head(dplyr::arrange(HAPPY,HAPPY,SEX))
+```
+
+
+Part 2:
+(1)-----------------------------------------------------
+```{r}
+library("ggplot2")
+ggplot(data=HAPPY, aes(x=HAPPY)) + geom_bar(aes(fill=HEALTH))
+```
+
+You can see how the happiness ratings are distributed among the health of individuals. I found it kind of weird how people with poor health would say they are very happy, strange phenomenon. But the most even distribution is in the "not to happy" category. I think this may have to do with the fact that unhappiness doesn't directly spur from health in general. Going to dig deeper to find what correlates more with "not to happy".
+
+
+```{r}
+ggplot(data=HAPPY, aes(x=HAPPY, y=AGE, na.rm=TRUE)) + geom_boxplot(aes(fill=SEX))
+```
+
+You can see in this plot that the average age of men is lower in the "not too happy" and "pretty happy" categories. But in the "very happy" category the average age of men is higher. It seems that a mans happiness increases as he gets older, while women tend to stay the same at each age.
+
+(2)------------------------------------------------------
+```{r}
+ggplot(HAPPY, aes(x=MARITAL)) + geom_bar(aes(fill=HAPPY))+theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+It seems that most people based on marriage are 'pretty happy'. I am surprised that most people who are divorced are 'pretty happy'. The distribution of Married people is very lopsided towards 'very happy'
+
+```{r}
+install.packages("ggmosaic")
+library("ggmosaic")
+ggplot(HAPPY, aes(na.rm=TRUE)) + geom_mosaic(aes(x=product(HAPPY), fill=FINRELA, na.rm=TRUE))+theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+You can see that the 'very happy' category has a large percentage of above average finacial relativity. Seems like the more money one has the happier he/she is. There is also are large percentage of people in the 'not too happy' who are far below average in finacial relativity.
+
+```{r}
+library("ggplot2")
+ggplot(HAPPY, aes(fill=HAPPY)) + geom_histogram(aes(x=AGE), binwidth=10, position="dodge") + scale_y_log10()
+```
+
+It seems that the peak of very happiness comes when you are around age 28.
+
+
+(3)
+Looking through the dataset we can see that many factor effect happiness overall. The factors that I looked at were age, finrela, and marriage. These variables seemed to have an effect on overall happiness. The age had a spike in happiness when the age was around 28. The finrela had a great increase in 'very happy' when the finrela was above average. Finally, the marriage status was largely distributed over the married category in 'pretty happy' and 'very happy'.
